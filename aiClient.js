@@ -1,7 +1,9 @@
 import { GoogleGenAI, mcpToTool } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { configDotenv } from "dotenv";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const serverParams = new StdioClientTransport({
   command: "uvx",
@@ -30,17 +32,17 @@ await client.connect(serverParams);
 async function callGemini() {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: "pull back myLook up my last 10 runs, find the run name, distance, pace, average heart rate, and evaluation, and organize it in sentances.",
+    contents: "Look up my last 10 runs, pull back information like pace, distance and heart rate and return it as a string. Please use the imperial system",
     config: {
       tools: [mcpToTool(client)]
     },
   });
 
-  const response2 = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: "Evaluate my runs and give my sumary of my performance. Data: " + response.text
-  });
-  return response2.text;
+  // const response2 = await ai.models.generateContent({
+  //   model: "gemini-2.5-flash",
+  //   contents: "Evaluate my runs and give my sumary of my performance. Data: " + response.text
+  // });
+  return response.text;
 }
 
 export { callGemini };
