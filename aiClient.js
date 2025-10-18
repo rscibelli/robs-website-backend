@@ -38,11 +38,21 @@ async function callGemini() {
     },
   });
 
+  const response2 = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Convert these activities into the imperial system and return it back in a nice table. Data: " + response.text
+  });
+
+  const response3 = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: "Give me a summary of how my performance has been across these activities. Data: " + response2.text
+  });
+
   // const response2 = await ai.models.generateContent({
   //   model: "gemini-2.5-flash",
   //   contents: "Evaluate my runs and give my sumary of my performance. Data: " + response.text
   // });
-  return response.text;
+  return response2.text + "\n\n" + response3.text;
 }
 
 export { callGemini };
