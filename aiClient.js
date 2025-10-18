@@ -32,7 +32,7 @@ await client.connect(serverParams);
 async function callGemini() {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: "Look up my last 10 runs, pull back information like pace, distance and heart rate and return it as a string. Please use the imperial system",
+    contents: "Look up my last 10 activities, pull back information like pace, distance and heart rate and return it as a string.",
     config: {
       tools: [mcpToTool(client)]
     },
