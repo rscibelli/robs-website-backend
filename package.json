@@ -1,0 +1,26 @@
+{
+  "name": "robs-website-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rscibelli/robs-website-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rscibelli/robs-website-backend/issues"
+  },
+  "homepage": "https://github.com/rscibelli/robs-website-backend#readme",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^1.25.0",
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}
