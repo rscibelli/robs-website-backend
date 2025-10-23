@@ -33,15 +33,15 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Look up my last 10 running activities.
-    Return a JSON array of objects where each object has the following fields:
-    - runDate (string)
-    - name (string, the activity name)
-    - distance (string)
-    - time (string)
-    - pace (string)
-    - caloriesBurned (integer)
-    - averageHeartRate (integer)
+    Look up my last 15 activities.
+    pull back following fields for each activity, you can just keep it all as a string:
+    - runDate
+    - name
+    - distance
+    - time
+    - pace
+    - caloriesBurned
+    - averageHeartRate
   `
 
   const response1 = await ai.models.generateContent({
