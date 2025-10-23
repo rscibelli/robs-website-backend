@@ -33,15 +33,10 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Look up my last 15 activities using the Garmin MCP. Pull back following fields for each activity, you can just keep it all as a string:
-    - runDate
-    - name
-    - distance
-    - time
-    - pace
-    - caloriesBurned
-    - averageHeartRate
-  `
+    Use the Garmin MCP tool to look up my last 15 running activities.
+    Return each activity as a string with these fields:
+    runDate, name, distance, time, pace, caloriesBurned, averageHeartRate.
+  `;
 
   const response1 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
