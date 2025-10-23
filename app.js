@@ -1,6 +1,6 @@
 import { callGemini } from './aiClient.js';
 import express from 'express';
-import { getSummaries, getRuns, getTodaysRunsAndSummary } from './dbCalls.js';
+import { getTodaysRunsAndSummary } from './dbCalls.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
