@@ -47,7 +47,9 @@ async function callGemini() {
   const response1 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
-    tools: [mcpToTool(client)],
+    config: {
+      tools: [mcpToTool(client)],
+    },
     generationConfig: { 
       responseMimeType: "application/json",
       responseSchema: {
