@@ -47,7 +47,7 @@ async function callGemini() {
   const response1 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
-    config: { 
+    generationConfig: { 
       tools: [mcpToTool(client)],
       responseMimeType: "application/json",
       responseSchema: {
@@ -71,7 +71,6 @@ async function callGemini() {
 
   const runsMetric = response1.text;
 
-  // Step 2: Convert to imperial units (miles, min/mile)
   const response2 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
@@ -99,7 +98,6 @@ async function callGemini() {
 
   const runsImperial = response2.text;
 
-  // Step 3: Generate performance summary
   const response3 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
@@ -108,7 +106,6 @@ async function callGemini() {
 
   const summaryText = response3.text;
 
-  // --- Parse runs JSON safely ---
   let runsJson;
   try {
     runsJson = JSON.parse(runsImperial);
