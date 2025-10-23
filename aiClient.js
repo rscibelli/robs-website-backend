@@ -47,8 +47,8 @@ async function callGemini() {
   const response1 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: prompt,
+    tools: [mcpToTool(client)],
     generationConfig: { 
-      tools: [mcpToTool(client)],
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.ARRAY,
@@ -121,7 +121,7 @@ async function callGemini() {
   const date = new Date(
     new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
   )
-  const summary = insertInSummary(date, summaryText);
+  const summary = await insertInSummary(date, summaryText);
 
   console.log(summary);
   console.log(summary.insertId);
