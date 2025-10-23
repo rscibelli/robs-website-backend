@@ -123,6 +123,10 @@ async function callGemini() {
   )
   const summary = insertInSummary(date, summaryText);
 
+  console.log(summary);
+  console.log(summary.insertId);
+  console.log(date);
+
   for (const run of runsJson) {
     const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
 
