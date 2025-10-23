@@ -12,7 +12,7 @@ const db = await mysql.createConnection({
 
 async function insertInSummary(date, summaryText) {
     const [result] = await db.execute(
-        "INSERT INTO summary (date, summary) VALUES (?, ?)",
+        "INSERT INTO summary (insertDate, summary) VALUES (?, ?)",
         [date, summaryText]
     );
     return result;
