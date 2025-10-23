@@ -35,7 +35,7 @@ async function callGemini() {
   const prompt = `
     Look up my last 10 running activities.
     Return a JSON array of objects where each object has the following fields:
-    - date (string)
+    - runDate (string)
     - name (string, the activity name)
     - distance (string)
     - time (string)
@@ -51,17 +51,17 @@ async function callGemini() {
       tools: [mcpToTool(client)],
       responseMimeType: "application/json",
       responseSchema: {
-        type: "array",
+        type: Type.ARRAY,
         items: {
-          type: "object",
+          type: Type.OBJECT,
           properties: {
-            runDate: { type: "string" },
-            name: { type: "string" },
-            distance: { type: "string" },
-            time: { type: "string" },
-            pace: { type: "string" },
-            caloriesBurned: { type: "integer" },
-            averageHeartRate: { type: "integer" },
+            runDate: { type: Type.STRING },
+            name: { type: Type.STRING },
+            distance: { type: Type.STRING },
+            time: { type: Type.STRING },
+            pace: { type: Type.STRING },
+            caloriesBurned: { type: Type.INTEGER },
+            averageHeartRate: { type: Type.INTEGER },
           },
           required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
         },
