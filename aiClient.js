@@ -33,7 +33,7 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Use the Garmin MCP tool to look up my last 15 running activities.
+    Use the Garmin MCP tool to look up my last 10 running activities.
     Return each activity as a string with these fields:
     runDate, name, distance, time, pace, caloriesBurned, averageHeartRate.
   `;
