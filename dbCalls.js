@@ -56,5 +56,18 @@ async function insertRun(
   ]);
 }
 
+async function getTodaysRunsAndSummary() {
+    // Get today's date in YYYY-MM-DD format (assuming runDate is stored as DATE or string in that format)
+    const today = new Date().toISOString().slice(0, 10);
+    const [runs] = await db.execute("SELECT * FROM runs WHERE DATE(runDate) = ? ORDER BY runDate DESC", [today]);
+    if (runs.length === 0) {
+        return { runs: [], summary: null };
+    }
+    // Assume all today's runs have the same summary_id (if not, you may want to adjust this logic)
+    const summaryId = runs[0].summary_id;
+    const [summaryRows] = await db.execute("SELECT * FROM summary WHERE id = ?", [summaryId]);
+    const summary = summaryRows.length > 0 ? summaryRows[0] : null;
+    return { runs, summary };
+}
 
-export { insertInSummary, insertRun };
+export { insertInSummary, insertRun, getTodaysRunsAndSummary };
