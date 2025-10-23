@@ -10,10 +10,10 @@ const db = await mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
-async function insertInSummary(summaryText) {
+async function insertInSummary(date, summaryText) {
     return await db.execute(
-        "INSERT INTO summary (date, summary) VALUES (CURDATE(), ?)",
-        [summaryText]
+        "INSERT INTO summary (date, summary) VALUES (?, ?)",
+        [date, summaryText]
     );
 }
 
@@ -42,7 +42,7 @@ async function insertRun(
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  await connection.execute(sql, [
+  await db.execute(sql, [
     summaryId,
     runDate,
     insertDate,

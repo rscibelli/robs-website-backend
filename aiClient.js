@@ -114,13 +114,19 @@ async function callGemini() {
     return { error: "Invalid JSON from AI" };
   }
 
-  const summary = insertInSummary(summaryText);
-  const insertDate = new Date().toISOString().split("T")[0];
+  console.log(runsImperial)
+  console.log(runsJson)
+  console.log(summaryText)
+
+  const date = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+  )
+  const summary = insertInSummary(date, summaryText);
 
   for (const run of runsJson) {
     const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
 
-    await insertRun(summary.insertId, runDate, insertDate, name, distance, time, pace, caloriesBurned, averageHeartRate);
+    await insertRun(summary.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
   }
 
 
