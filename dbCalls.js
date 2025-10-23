@@ -59,7 +59,7 @@ async function insertRun(
 async function getTodaysRunsAndSummary() {
     // Get today's date in YYYY-MM-DD format (assuming runDate is stored as DATE or string in that format)
     const today = new Date().toISOString().slice(0, 10);
-    const [runs] = await db.execute("SELECT * FROM runs WHERE DATE(runDate) = ? ORDER BY runDate DESC", [today]);
+    const [runs] = await db.execute("SELECT * FROM runs WHERE DATE(insertDate) = ? ORDER BY runDate DESC", [today]);
     if (runs.length === 0) {
         return { runs: [], summary: null };
     }
