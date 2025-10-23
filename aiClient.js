@@ -50,25 +50,6 @@ async function callGemini() {
     config: {
       tools: [mcpToTool(client)],
     },
-    generationConfig: { 
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            runDate: { type: Type.STRING },
-            name: { type: Type.STRING },
-            distance: { type: Type.STRING },
-            time: { type: Type.STRING },
-            pace: { type: Type.STRING },
-            caloriesBurned: { type: Type.INTEGER },
-            averageHeartRate: { type: Type.INTEGER },
-          },
-          required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
-        },
-      },
-    },
   });
 
   const runsMetric = response1.text;
