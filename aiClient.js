@@ -1,17 +1,10 @@
 import { GoogleGenAI, mcpToTool } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import mysql from "mysql2/promise";
+import { insertInSummary, insertRun } from "./dbCalls";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-const db = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
 
 const serverParams = new StdioClientTransport({
   command: "uvx",
@@ -38,20 +31,70 @@ const ai = new GoogleGenAI({
 await client.connect(serverParams);
 
 async function callGemini() {
+
+  const prompt = `
+    Look up my last 10 running activities.
+    Return a JSON array of objects where each object has the following fields:
+    - date (string)
+    - name (string, the activity name)
+    - distance (string)
+    - time (string)
+    - pace (string)
+    - caloriesBurned (integer)
+    - averageHeartRate (integer)
+  `
+
   const response1 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents:
-      "Look up my last 10 activities, return a JSON array with fields: date, distance_km, pace_min_per_km, heart_rate_avg.",
-    config: { tools: [mcpToTool(client)] },
+    contents: prompt,
+    config: { 
+      tools: [mcpToTool(client)],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            runDate: { type: "string" },
+            name: { type: "string" },
+            distance: { type: "string" },
+            time: { type: "string" },
+            pace: { type: "string" },
+            caloriesBurned: { type: "integer" },
+            averageHeartRate: { type: "integer" },
+          },
+          required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
+        },
+      },
+    },
   });
 
-  const runsRaw = response1.text;
+  const runsMetric = response1.text;
 
   // Step 2: Convert to imperial units (miles, min/mile)
   const response2 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
-      `Convert this running data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsRaw}`,
+      `Convert this running data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            runDate: { type: "string" },
+            name: { type: "string" },
+            distance: { type: "string" },
+            time: { type: "string" },
+            pace: { type: "string" },
+            caloriesBurned: { type: "integer" },
+            averageHeartRate: { type: "integer" },
+          },
+          required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
+        },
+      },
+    },
   });
 
   const runsImperial = response2.text;
@@ -74,26 +117,16 @@ async function callGemini() {
     return { error: "Invalid JSON from AI" };
   }
 
-  // --- Insert summary ---
-  const [summaryResult] = await db.execute(
-    "INSERT INTO summary (date, summary) VALUES (CURDATE(), ?)",
-    [summaryText]
-  );
+  const summary = insertInSummary(summaryText);
+  const insertDate = new Date().toISOString().split("T")[0];
 
-  const summaryId = summaryResult.insertId;
-
-  // --- Insert runs ---
   for (const run of runsJson) {
-    const { date, distance_mi, pace_min_per_mile, heart_rate_avg } = run;
-    const runData = JSON.stringify(run);
+    const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
 
-    await db.execute(
-      "INSERT INTO runs (summary_id, date, runData) VALUES (?, ?, ?)",
-      [summaryId, date, runData]
-    );
+    await insertRun(summary.insertId, runDate, insertDate, name, distance, time, pace, caloriesBurned, averageHeartRate);
   }
 
-  // --- Return combined result ---
+
   return {
     runs: runsJson,
     summary: summaryText,
