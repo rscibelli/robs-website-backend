@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 const allowedOrigins = [
   "https://rscibelli.com",      // your frontend
   "https://www.rscibelli.com",  // optional, in case users hit the www domain
-  "http://localhost:5173",      // local dev (Vite, for example)
+  "http://localhost",      // local dev (Vite, for example)
 ];
 
 app.use(
@@ -27,7 +27,7 @@ app.use(
 
 app.use(express.json());
 
-app.get('/', async (req, res) => {
+app.get('/generate-summary', async (req, res) => {
     let response = await callGemini();
     res.send(response);
 });
