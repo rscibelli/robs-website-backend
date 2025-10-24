@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 const allowedOrigins = [
   "https://rscibelli.com",      // your frontend
   "https://www.rscibelli.com",  // optional, in case users hit the www domain
-  "http://localhost",      // local dev (Vite, for example)
+  "http://localhost:3000",      // local dev (Vite, for example)
 ];
 
 app.use(
