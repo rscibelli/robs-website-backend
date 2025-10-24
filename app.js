@@ -1,6 +1,7 @@
 import { callGemini } from './aiClient.js';
 import cors from "cors";
 import express from 'express';
+import cron from "node-cron";
 import { getTodaysRunsAndSummary } from './dbCalls.js';
 
 const app = express();
@@ -30,6 +31,18 @@ app.use(express.json());
 app.get('/generate-summary', async (req, res) => {
     let response = await callGemini();
     res.send(response);
+});
+
+cron.schedule("0 6 * * *", async () => {
+  try {
+    console.log("Running scheduled Gemini task at 6am...");
+    await callGemini();
+    console.log("✅ callGemini finished successfully");
+  } catch (err) {
+    console.error("❌ Error running callGemini:", err);
+  }
+}, {
+  timezone: "America/New_York"
 });
 
 app.get('/api/todays-runs-summary', async (req, res) => {
