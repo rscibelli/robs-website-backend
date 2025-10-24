@@ -1,16 +1,36 @@
 import { callGemini } from './aiClient.js';
+import cors from "cors";
 import express from 'express';
 import { getTodaysRunsAndSummary } from './dbCalls.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  "https://rscibelli.com",      // your frontend
+  "https://www.rscibelli.com",  // optional, in case users hit the www domain
+  "http://localhost:5173",      // local dev (Vite, for example)
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed for this origin: " + origin));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// app.get('/', async (req, res) => {
-//     let response = await callGemini();
-//     res.send(response);
-// });
+app.get('/', async (req, res) => {
+    let response = await callGemini();
+    res.send(response);
+});
 
 app.get('/api/todays-runs-summary', async (req, res) => {
     try {
