@@ -7,10 +7,10 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get('/', async (req, res) => {
-    let response = await callGemini();
-    res.send(response);
-});
+// app.get('/', async (req, res) => {
+//     let response = await callGemini();
+//     res.send(response);
+// });
 
 app.get('/api/todays-runs-summary', async (req, res) => {
     try {
