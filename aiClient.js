@@ -33,7 +33,7 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Look up my last 10 activities. Pull back following fields for each activity, you can just keep it all as a string:
+    Look up my last 10 activities using the Garmin MCP. Pull back following fields for each activity, you can just keep it all as a string:
     - runDate
     - name
     - distance
@@ -53,7 +53,8 @@ async function callGemini() {
 
   const runsMetric = response1.text;
 
-  console.log("Runs in Metric:", response1);
+  console.log("Response from Gemini: ", response1);
+  console.log("Runs: ", runsMetric)
 
   const response2 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -109,9 +110,7 @@ async function callGemini() {
   )
   const summary = await insertInSummary(date, summaryText);
 
-  console.log(summary);
-  console.log(summary.insertId);
-  console.log(date);
+  console.log("Summary: ", summary);
 
   for (const run of runsJson) {
     const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
