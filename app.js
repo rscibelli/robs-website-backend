@@ -2,7 +2,7 @@ import { callGemini } from './aiClient.js';
 import cors from "cors";
 import express from 'express';
 import cron from "node-cron";
-import { getTodaysRunsAndSummary } from './dbCalls.js';
+import { getRunsByDate } from './dbCalls.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -46,8 +46,9 @@ cron.schedule("0 6 * * *", async () => {
 });
 
 app.get('/api/todays-runs-summary', async (req, res) => {
+    const today = new Date().toISOString().slice(0, 10);
     try {
-        const data = await getTodaysRunsAndSummary();
+        const data = await getRunsByDate(today);
         res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch today\'s runs and summary', details: err.message });
@@ -56,5 +57,5 @@ app.get('/api/todays-runs-summary', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running ${port}`);
 });

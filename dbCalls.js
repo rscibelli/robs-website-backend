@@ -3,18 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const db = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
-
 async function insertInSummary(date, summaryText) {
+    const db = createDatabaseConnection();
     const [result] = await db.execute(
         "INSERT INTO summary (insertDate, summary) VALUES (?, ?)",
         [date, summaryText]
     );
+    db.destroy();
     return result;
 }
 
@@ -29,45 +24,69 @@ async function insertRun(
   caloriesBurned,
   averageHeartRate
 ) {
-  const sql = `
-    INSERT INTO runs (
-      summary_id,
-      runDate,
-      insertDate,
-      name,
-      distance,
-      time,
-      pace,
-      caloriesBurned,
-      averageHeartRate
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+    const db = createDatabaseConnection();
 
-  await db.execute(sql, [
-    summaryId,
-    runDate,
-    insertDate,
-    name,
-    distance,
-    time,
-    pace,
-    caloriesBurned,
-    averageHeartRate
-  ]);
+    const sql = `
+        INSERT INTO runs (
+        summary_id,
+        runDate,
+        insertDate,
+        name,
+        distance,
+        time,
+        pace,
+        caloriesBurned,
+        averageHeartRate
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    await db.execute(sql, [
+        summaryId,
+        runDate,
+        insertDate,
+        name,
+        distance,
+        time,
+        pace,
+        caloriesBurned,
+        averageHeartRate
+    ]);
+    db.destroy();
 }
 
-async function getTodaysRunsAndSummary() {
-    // Get today's date in YYYY-MM-DD format (assuming runDate is stored as DATE or string in that format)
-    const today = new Date().toISOString().slice(0, 10);
-    const [runs] = await db.execute("SELECT * FROM runs WHERE DATE(insertDate) = ? ORDER BY runDate DESC", [today]);
-    if (runs.length === 0) {
+async function getRunsByDate(date) {
+    const db = createDatabaseConnection();
+    
+    const [summaryRows] = await db.execute(
+        "SELECT * FROM summary WHERE DATE(insertDate) = ? LIMIT 1",
+        [date]
+    );
+
+    if (summaryRows.length === 0) {
         return { runs: [], summary: null };
     }
-    // Assume all today's runs have the same summary_id (if not, you may want to adjust this logic)
-    const summaryId = runs[0].summary_id;
-    const [summaryRows] = await db.execute("SELECT * FROM summary WHERE id = ?", [summaryId]);
-    const summary = summaryRows.length > 0 ? summaryRows[0] : null;
+
+    const summary = summaryRows[0];
+    const summaryId = summary.id;
+
+    const [runs] = await db.execute(
+        "SELECT * FROM runs WHERE summary_id = ? ORDER BY runDate DESC",
+        [summaryId]
+    );
+    db.destroy();
+
     return { runs, summary };
 }
 
-export { insertInSummary, insertRun, getTodaysRunsAndSummary };
+async function createDatabaseConnection() {
+    const db = await mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+    });
+
+    return db;
+}
+
+export { insertInSummary, insertRun, getRunsByDate };
