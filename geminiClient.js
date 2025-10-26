@@ -33,7 +33,7 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Look up my last 5 activities using the Garmin MCP. Pull back following fields for each activity, you can just keep it all as a string:
+    Look up my last 5 activities using the Garmin MCP. Using each activity id, get following fields for each activity, you can just keepthe final response it all as a string:
     - runDate
     - name
     - distance
