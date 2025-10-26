@@ -33,7 +33,7 @@ await client.connect(serverParams);
 async function callGemini() {
 
   const prompt = `
-    Look up my last 5 activities using the Garmin MCP. Gather the following fields from each run, you can just keep the final response as a string:
+    Look up my last 10 activities using the Garmin MCP. Gather the following fields from each run, you can just keep the final response as a string:
     - date
     - name
     - distance
@@ -56,74 +56,74 @@ async function callGemini() {
   console.log("Response from Gemini: ", response1);
   console.log("Runs: ", runsMetric);
 
-  return { runsMetric };
+  // return { runsMetric };
 
-  // const response2 = await ai.models.generateContent({
-  //   model: "gemini-2.5-flash",
-  //   contents:
-  //     `Convert this running data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
-  //   config: {
-  //     responseMimeType: "application/json",
-  //     responseSchema: {
-  //       type: "array",
-  //       items: {
-  //         type: "object",
-  //         properties: {
-  //           runDate: { type: "string" },
-  //           name: { type: "string" },
-  //           distance: { type: "string" },
-  //           time: { type: "string" },
-  //           pace: { type: "string" },
-  //           caloriesBurned: { type: "integer" },
-  //           averageHeartRate: { type: "integer" },
-  //         },
-  //         required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
-  //       },
-  //     },
-  //   },
-  // });
+  const response2 = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents:
+      `Convert this running data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            runDate: { type: "string" },
+            name: { type: "string" },
+            distance: { type: "string" },
+            time: { type: "string" },
+            pace: { type: "string" },
+            caloriesBurned: { type: "integer" },
+            averageHeartRate: { type: "integer" },
+          },
+          required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
+        },
+      },
+    },
+  });
 
-  // const runsImperial = response2.text;
+  const runsImperial = response2.text;
 
-  // const response3 = await ai.models.generateContent({
-  //   model: "gemini-2.5-flash",
-  //   contents:
-  //     `You are a running coach. Analyze the following run data and give me a summary of my performance.
-  //     Tell my what I did right, and tell me some things I can do to improve in my training.
-  //     Return just a plain text summary. Data: ${runsImperial}`,
-  // });
+  const response3 = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents:
+      `You are a running coach. Analyze the following run data and give me a summary of my performance.
+      Tell my what I did right, and tell me some things I can do to improve in my training.
+      Return just a plain text summary. Data: ${runsImperial}`,
+  });
 
-  // const summaryText = response3.text;
+  const summaryText = response3.text;
 
-  // let runsJson;
-  // try {
-  //   runsJson = JSON.parse(runsImperial);
-  // } catch (err) {
-  //   console.error("❌ Failed to parse runs JSON:", err);
-  //   return { error: "Invalid JSON from AI" };
-  // }
+  let runsJson;
+  try {
+    runsJson = JSON.parse(runsImperial);
+  } catch (err) {
+    console.error("❌ Failed to parse runs JSON:", err);
+    return { error: "Invalid JSON from AI" };
+  }
 
-  // console.log(runsImperial)
-  // console.log(runsJson)
-  // console.log(summaryText)
+  console.log(runsImperial)
+  console.log(runsJson)
+  console.log(summaryText)
 
-  // const date = new Date(
-  //   new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
-  // )
-  // const summary = await insertInSummary(date, summaryText);
+  const date = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+  )
+  const summary = await insertInSummary(date, summaryText);
 
-  // console.log("Summary: ", summary);
+  console.log("Summary: ", summary);
 
-  // for (const run of runsJson) {
-  //   const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
+  for (const run of runsJson) {
+    const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
 
-  //   await insertRun(summary.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
-  // }
+    await insertRun(summary.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
+  }
 
-  // return {
-  //   runs: runsJson,
-  //   summary: summaryText,
-  // };
+  return {
+    runs: runsJson,
+    summary: summaryText,
+  };
 }
 
 export { callGemini };
