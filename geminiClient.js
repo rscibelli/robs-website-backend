@@ -118,7 +118,6 @@ async function callGemini() {
     await insertRun(summary.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
   }
 
-
   return {
     runs: runsJson,
     summary: summaryText,

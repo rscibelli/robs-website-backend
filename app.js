@@ -1,4 +1,4 @@
-import { callGemini } from './aiClient.js';
+import { callGemini } from './geminiClient.js';
 import cors from "cors";
 import express from 'express';
 import cron from "node-cron";
