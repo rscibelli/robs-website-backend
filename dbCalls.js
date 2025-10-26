@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 async function insertInSummary(date, summaryText) {
-    const db = createDatabaseConnection();
+    const db = await createDatabaseConnection();
     const [result] = await db.execute(
         "INSERT INTO summary (insertDate, summary) VALUES (?, ?)",
         [date, summaryText]
@@ -24,7 +24,7 @@ async function insertRun(
   caloriesBurned,
   averageHeartRate
 ) {
-    const db = createDatabaseConnection();
+    const db = await createDatabaseConnection();
 
     const sql = `
         INSERT INTO runs (
@@ -55,7 +55,7 @@ async function insertRun(
 }
 
 async function getRunsByDate(date) {
-    const db = createDatabaseConnection();
+    const db = await createDatabaseConnection();
     
     const [summaryRows] = await db.execute(
         "SELECT * FROM summary WHERE DATE(insertDate) = ? LIMIT 1",
