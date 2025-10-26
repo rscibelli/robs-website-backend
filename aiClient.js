@@ -85,7 +85,9 @@ async function callGemini() {
   const response3 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
-      `Analyze the following runs data and give me a summary of my performance over time. Return just a plain text summary. Data: ${runsImperial}`,
+      `You are a running coach. Analyze the following run data and give me a summary of my performance.
+      Tell my what I did right, and tell me some things I can do to improve in my training.
+      Return just a plain text summary. Data: ${runsImperial}`,
   });
 
   const summaryText = response3.text;
