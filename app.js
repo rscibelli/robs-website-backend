@@ -1,8 +1,8 @@
-import { callGemini } from './geminiClient.js';
+import { generateAnalysis } from './geminiClient.js';
 import cors from "cors";
 import express from 'express';
 import cron from "node-cron";
-import { getRunsByDate } from './dbCalls.js';
+import { getLatestRunData } from './dbCalls.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,14 +29,14 @@ app.use(
 app.use(express.json());
 
 app.get('/generate-summary', async (req, res) => {
-    let response = await callGemini();
+    let response = await generateAnalysis();
     res.send(response);
 });
 
 cron.schedule("0 6 * * *", async () => {
   try {
     console.log("Running scheduled Gemini task at 6am...");
-    await callGemini();
+    await generateAnalysis();
     console.log("✅ callGemini finished successfully");
   } catch (err) {
     console.error("❌ Error running callGemini:", err);
@@ -46,9 +46,8 @@ cron.schedule("0 6 * * *", async () => {
 });
 
 app.get('/api/todays-runs-summary', async (req, res) => {
-    const today = new Date().toISOString().slice(0, 10);
     try {
-        const data = await getRunsByDate(today);
+        const data = await getLatestRunData();
         res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch today\'s runs and summary', details: err.message });

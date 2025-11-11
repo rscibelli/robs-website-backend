@@ -1,10 +1,12 @@
-import { GoogleGenAI, mcpToTool, Type } from "@google/genai";
+import { GoogleGenAI, mcpToTool } from "@google/genai";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { insertInSummary, insertRun } from "./dbCalls.js";
 import dotenv from "dotenv";
 
 dotenv.config();
+
+const MAX_ATTEMPTS = 5;
 
 const serverParams = new StdioClientTransport({
   command: "uvx",
@@ -30,10 +32,10 @@ const ai = new GoogleGenAI({
 
 await client.connect(serverParams);
 
-async function callGemini() {
+async function generateAnalysis() {
 
   const prompt = `
-    Look up my last 10 activities using the Garmin MCP. Gather the following fields from each run, you can just keep the final response as a string:
+    Look up my last 10 activities using the Garmin MCP. Gather the following fields from each, you can just keep the final response as a string:
     - date
     - name
     - distance
@@ -43,25 +45,39 @@ async function callGemini() {
     - averageHeartRate
   `;
 
-  const response1 = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      tools: [mcpToTool(client)],
-    },
-  });
+  const runsMetric = "";
 
-  const runsMetric = response1.text;
+  for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
+    const response1 = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        tools: [mcpToTool(client)],
+      },
+    });
 
-  console.log("Response from Gemini: ", response1);
-  console.log("Runs: ", runsMetric);
+    runsMetric = response1.text;
 
-  // return { runsMetric };
+    console.log("Response from Gemini: ", response1);
+    console.log("Runs: ", runsMetric);
+
+    try {
+      validateRunData(runsMetric);
+    } catch (err) {
+      console.error(`Validation failed on attempt ${attempt + 1}: `, err);
+      if (attempt === MAX_ATTEMPTS) {
+        throw new Error("Max attempts reached. Unable to get valid run data.");
+      }
+      continue;
+    }
+    break;
+  }
+  
 
   const response2 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
-      `Convert this running data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
+      `Convert this data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -88,9 +104,8 @@ async function callGemini() {
   const response3 = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents:
-      `You are a running coach. Analyze the following run data and give me a summary of my performance.
-      Tell my what I did right, and tell me some things I can do to improve in my training.
-      Return just a plain text summary. Data: ${runsImperial}`,
+      `You are a running coach. Analyze the following data, tell my what I did right and tell me some things 
+      I can do to improve in my training. Return just a plain text summary. Data: ${runsImperial}`,
   });
 
   const summaryText = response3.text;
@@ -99,7 +114,7 @@ async function callGemini() {
   try {
     runsJson = JSON.parse(runsImperial);
   } catch (err) {
-    console.error("❌ Failed to parse runs JSON:", err);
+    console.error("Failed to parse runs JSON:", err);
     return { error: "Invalid JSON from AI" };
   }
 
@@ -126,4 +141,16 @@ async function callGemini() {
   };
 }
 
-export { callGemini };
+function validateRunData(runs) {
+  let runsJson = JSON.parse(runs);
+
+  if (runsJson.length !== 10) {
+    throw new Error("Expected 10 runs, got " + runsJson.length);
+  }
+
+  if (runsJson.some(run => !run.runDate || !run.name || !run.distance || !run.time || !run.pace || !run.caloriesBurned || !run.averageHeartRate)) {
+    throw new Error("One or more runs are missing required fields");
+  }
+}
+
+export { generateAnalysis };

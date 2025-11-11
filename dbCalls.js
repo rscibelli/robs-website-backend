@@ -54,13 +54,10 @@ async function insertRun(
     db.destroy();
 }
 
-async function getRunsByDate(date) {
+async function getLatestRunData() {
     const db = await createDatabaseConnection();
     
-    const [summaryRows] = await db.execute(
-        "SELECT * FROM summary WHERE DATE(insertDate) = ? LIMIT 1",
-        [date]
-    );
+    const [summaryRows] = await db.execute("SELECT * FROM summary ORDER BY id DESC LIMIT 1");
 
     if (summaryRows.length === 0) {
         return { runs: [], summary: null };
@@ -89,4 +86,4 @@ async function createDatabaseConnection() {
     return db;
 }
 
-export { insertInSummary, insertRun, getRunsByDate };
+export { insertInSummary, insertRun, getLatestRunData };
