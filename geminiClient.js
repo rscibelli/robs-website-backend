@@ -45,7 +45,7 @@ async function generateAnalysis() {
     - averageHeartRate
   `;
 
-  const runsMetric = "";
+  let runsMetric = "";
 
   for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
     const response1 = await ai.models.generateContent({
