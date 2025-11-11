@@ -1,8 +1,12 @@
-import { generateAnalysis } from './geminiClient.js';
+import { generateAnalysis } from './runAnalysisService.js';
+import { getGolfData } from './golfAnalysisService.js';
 import cors from "cors";
 import express from 'express';
 import cron from "node-cron";
 import { getLatestRunData } from './dbCalls.js';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,7 +43,7 @@ cron.schedule("0 6 * * *", async () => {
     await generateAnalysis();
     console.log("✅ callGemini finished successfully");
   } catch (err) {
-    console.error("❌ Error running callGemini:", err);
+    console.error("❌ Error running callGemini: ", err);
   }
 }, {
   timezone: "America/New_York"
@@ -51,6 +55,15 @@ app.get('/api/todays-runs-summary', async (req, res) => {
         res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch today\'s runs and summary', details: err.message });
+    }
+});
+
+app.get('/get-golf-data', async (req, res) => {
+    try {
+        const data = await getGolfData();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch golf data', details: err.message });
     }
 });
 

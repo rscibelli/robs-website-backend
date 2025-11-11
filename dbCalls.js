@@ -1,7 +1,4 @@
 import mysql from "mysql2/promise";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 async function insertInSummary(date, summaryText) {
     const db = await createDatabaseConnection();
