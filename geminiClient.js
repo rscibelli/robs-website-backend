@@ -63,7 +63,7 @@ async function generateAnalysis() {
     - caloriesBurned
     - averageHeartRate
   `;
-  const convertToImperialPrompt = "Convert this data into imperial units (miles, min/mile) and return valid JSON. Data: ";
+  const convertToImperialPrompt = "Convert this data into imperial units (miles, min:sec per mile) and return valid JSON. Data: ";
   const analyzePrompt = `You are a running coach. Analyze the following data, 
   tell my what I did right and tell me some things I can do to improve in my training. 
   Return just a plain text summary. Data: `;
@@ -91,6 +91,8 @@ async function generateAnalysis() {
     break;
   }
 
+  console.log(summary);
+
   let runsJson;
   try {
     runsJson = JSON.parse(runsImperial);
@@ -108,6 +110,8 @@ async function generateAnalysis() {
     const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
     await insertRun(summaryDto.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
   }
+
+  console.log("Finished generating analysis and storing in DB.");
 
   return {
     runs: runsJson,
