@@ -32,9 +32,28 @@ const ai = new GoogleGenAI({
 
 await client.connect(serverParams);
 
-async function generateAnalysis() {
+const runSchema = {
+  responseMimeType: "application/json",
+  responseSchema: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        runDate: { type: "string" },
+        name: { type: "string" },
+        distance: { type: "string" },
+        time: { type: "string" },
+        pace: { type: "string" },
+        caloriesBurned: { type: "integer" },
+        averageHeartRate: { type: "integer" },
+      },
+      required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
+    },
+  },
+};
 
-  const prompt = `
+async function generateAnalysis() {
+  const collectRunsPrompt = `
     Look up my last 10 activities using the Garmin MCP. Gather the following fields from each, you can just keep the final response as a string:
     - date
     - name
@@ -44,25 +63,23 @@ async function generateAnalysis() {
     - caloriesBurned
     - averageHeartRate
   `;
+  const convertToImperialPrompt = "Convert this data into imperial units (miles, min/mile) and return valid JSON. Data: ";
+  const analyzePrompt = `You are a running coach. Analyze the following data, 
+  tell my what I did right and tell me some things I can do to improve in my training. 
+  Return just a plain text summary. Data: `;
 
   let runsMetric = "";
+  let runsImperial = "";
 
   for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
-    const response1 = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        tools: [mcpToTool(client)],
-      },
-    });
+    runsMetric = await callGeminiWithGarminTool(collectRunsPrompt);
 
-    runsMetric = response1.text;
-
-    console.log("Response from Gemini: ", response1);
     console.log("Runs: ", runsMetric);
 
+    runsImperial = await callGeminiWithSchema(convertToImperialPrompt + runsMetric, runSchema);
+
     try {
-      validateRunData(runsMetric);
+      validateRunData(runsImperial);
     } catch (err) {
       console.error(`Validation failed on attempt ${attempt + 1}: `, err);
       if (attempt === MAX_ATTEMPTS) {
@@ -72,43 +89,8 @@ async function generateAnalysis() {
     }
     break;
   }
-  
 
-  const response2 = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents:
-      `Convert this data into imperial units (miles, min/mile) and return valid JSON. Data: ${runsMetric}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            runDate: { type: "string" },
-            name: { type: "string" },
-            distance: { type: "string" },
-            time: { type: "string" },
-            pace: { type: "string" },
-            caloriesBurned: { type: "integer" },
-            averageHeartRate: { type: "integer" },
-          },
-          required: ["runDate", "name", "distance", "time", "pace", "caloriesBurned", "averageHeartRate"],
-        },
-      },
-    },
-  });
-
-  const runsImperial = response2.text;
-
-  const response3 = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents:
-      `You are a running coach. Analyze the following data, tell my what I did right and tell me some things 
-      I can do to improve in my training. Return just a plain text summary. Data: ${runsImperial}`,
-  });
-
-  const summaryText = response3.text;
+  const summary = await callGemini(analyzePrompt + runsImperial);
 
   let runsJson;
   try {
@@ -118,27 +100,52 @@ async function generateAnalysis() {
     return { error: "Invalid JSON from AI" };
   }
 
-  console.log(runsImperial)
-  console.log(runsJson)
-  console.log(summaryText)
-
   const date = new Date(
     new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
   )
-  const summary = await insertInSummary(date, summaryText);
-
-  console.log("Summary: ", summary);
+  const summaryDto = await insertInSummary(date, summary);
 
   for (const run of runsJson) {
     const { runDate, name, distance, time, pace, caloriesBurned, averageHeartRate } = run;
-
-    await insertRun(summary.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
+    await insertRun(summaryDto.insertId, runDate, date, name, distance, time, pace, caloriesBurned, averageHeartRate);
   }
 
   return {
     runs: runsJson,
-    summary: summaryText,
+    summary: summary,
   };
+}
+
+async function callGemini(prompt) {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+  });
+
+  return response.text;
+}
+
+async function callGeminiWithGarminTool(prompt) {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      tools: [mcpToTool(client)],
+    },
+  });
+
+  console.log("Response from Gemini with Garmin Tool: ", response);
+  return response.text;
+}
+
+async function callGeminiWithSchema(prompt, schema) {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: schema,
+  });
+
+  return response.text;
 }
 
 function validateRunData(runs) {
