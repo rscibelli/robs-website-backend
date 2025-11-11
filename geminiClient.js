@@ -70,18 +70,19 @@ async function generateAnalysis() {
 
   let runsMetric = "";
   let runsImperial = "";
+  let summary = "";
 
   for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
-    runsMetric = await callGeminiWithGarminTool(collectRunsPrompt);
-
-    console.log("Runs: ", runsMetric);
-
-    runsImperial = await callGeminiWithSchema(convertToImperialPrompt + runsMetric, runSchema);
-
     try {
+      runsMetric = await callGeminiWithGarminTool(collectRunsPrompt);
+      console.log("Runs: ", runsMetric);
+      runsImperial = await callGeminiWithSchema(convertToImperialPrompt + runsMetric, runSchema);
+
       validateRunData(runsImperial);
+
+      summary = await callGemini(analyzePrompt + runsImperial);
     } catch (err) {
-      console.error(`Validation failed on attempt ${attempt + 1}: `, err);
+      console.error(`AI calls or validation failed on attempt ${attempt + 1}: `, err);
       if (attempt === MAX_ATTEMPTS) {
         throw new Error("Max attempts reached. Unable to get valid run data.");
       }
@@ -89,8 +90,6 @@ async function generateAnalysis() {
     }
     break;
   }
-
-  const summary = await callGemini(analyzePrompt + runsImperial);
 
   let runsJson;
   try {
