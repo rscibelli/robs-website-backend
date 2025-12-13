@@ -12,7 +12,7 @@ This command will add pm2 into the OS so that pm2 is always started back up afte
 
 This is already configured to reload the pm2 process on the raspberry pi, and save the pm2 configuration so that it can come back on system reboot.
 
-# What's is this App?
+# What is this App?
 
 This is an Express.js application that generates a running analysis for me (Rob).
 
