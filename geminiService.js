@@ -3,7 +3,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const serverParams = new StdioClientTransport({
-  command: "uvx",
+  command: "/home/rscibelli/.local/bin/uvx",
   args: ["--python", "3.12",
         "--from", "git+https://github.com/Taxuspt/garmin_mcp",
         "garmin-mcp"],
