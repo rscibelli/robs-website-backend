@@ -68,7 +68,7 @@ app.get('/get-golf-data', async (req, res) => {
     }
 });
 
-app.get('/get-tee-times', async (req, res) => {
+app.get('/api/get-tee-times', async (req, res) => {
     try {
         const { courseName, date } = req.query;
         
