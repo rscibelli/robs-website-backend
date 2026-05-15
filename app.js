@@ -1,5 +1,6 @@
 import { generateAnalysis } from './runAnalysisService.js';
 import { getGolfData } from './golfAnalysisService.js';
+import { getTeeTimesForCourse } from './teeTimeBooker.js';
 import cors from "cors";
 import express from 'express';
 import cron from "node-cron";
@@ -64,6 +65,21 @@ app.get('/get-golf-data', async (req, res) => {
         res.json(data);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch golf data', details: err.message });
+    }
+});
+
+app.get('/get-tee-times', async (req, res) => {
+    try {
+        const { courseName, date } = req.query;
+        
+        if (!courseName) {
+            return res.status(400).json({ error: 'Missing required parameter: courseName' });
+        }
+        
+        const teeTimesData = await getTeeTimesForCourse(courseName, date || new Date().toISOString().split('T')[0]);
+        res.json(teeTimesData);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch tee times', details: err.message });
     }
 });
 
