@@ -18,7 +18,7 @@ async function getTeeTimesForCourse(courseName, date) {
     // FIX: Wait for the action buttons inside the tee time cards to load
     await page.waitForSelector('button:has-text("RATE"), button:has-text("NOW")');
 
-    const teeTimesData = await page.evaluate(() => {
+    const teeTimesData = await page.evaluate((courseName) => {
         // Find all tee time block containers (usually grouped inside rows/cols)
         // We look for elements containing a time format (e.g., "4:10 PM")
         const cardElements = Array.from(document.querySelectorAll('div')).filter(el => 
@@ -43,7 +43,7 @@ async function getTeeTimesForCourse(courseName, date) {
         const priceText = priceMatch ? priceMatch[0] : null;
 
         return {
-            courseName: courseName,
+            courseName,
             time: time,
             priceRange: priceText,
             golferCapacity: golfers,
@@ -51,7 +51,7 @@ async function getTeeTimesForCourse(courseName, date) {
             bookingUrl: window.location.href
         };
         });
-    });
+    }, courseName);
 
     console.log('Organized Tee Times Object:', JSON.stringify(teeTimesData, null, 2));
 
