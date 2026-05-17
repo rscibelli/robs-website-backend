@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import cheerio from 'cheerio';
 import { GOLF_COURSES } from './constants.js';
 
 async function getTeeTimesForCourse(courseName, date) {
@@ -18,40 +19,42 @@ async function getTeeTimesForCourse(courseName, date) {
     // FIX: Wait for the action buttons inside the tee time cards to load
     await page.waitForSelector('button:has-text("RATE"), button:has-text("NOW")');
 
-    const teeTimesData = await page.evaluate((courseName) => {
-        // Find all tee time block containers (usually grouped inside rows/cols)
-        // We look for elements containing a time format (e.g., "4:10 PM")
-        const cardElements = Array.from(document.querySelectorAll('div')).filter(el => 
-        el.innerText && /\d{1,2}:\d{2}\s(AM|PM)/.test(el.innerText) && (el.innerText.includes('CHOOSE RATE') || el.innerText.includes('BOOK NOW'))
-        );
+    const html = await page.content();
+    const $ = cheerio.load(html);
+    const timeRegex = /\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i;
+    const rateMarkerRegex = /BOOK NOW|CHOOSE RATE|RATE|NOW/i;
 
-        return cardElements.map(card => {
-        const text = card.innerText || '';
-        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+    const cards = [];
+    $('div, section, article, li').each((_, element) => {
+      const text = $(element).text().replace(/\s+/g, ' ').trim();
+      if (!text) return;
+      if (!timeRegex.test(text)) return;
+      if (!rateMarkerRegex.test(text)) return;
 
-        // Parsing based on the layout structure:
-        // Line 0: "4:10 PM"
-        // Line 1: "1 - 4" (Golfers)
-        // Line 2: "9 - 18" (Holes)
-        // Line 3: "Westover Golf Course"
-        const time = lines[0];
-        const golfers = lines[1];
-        const holes = lines[2];
-        
-        // Dynamically extract price ranges or single prices from the text block
-        const priceMatch = text.match(/\$\d+\.\d+(?:\s*–\s*\$\d+\.\d+)?/);
-        const priceText = priceMatch ? priceMatch[0] : null;
+      const parentText = $(element).parent().text().replace(/\s+/g, ' ').trim();
+      if (parentText === text) return;
 
-        return {
-            courseName,
-            time: time,
-            priceRange: priceText,
-            golferCapacity: golfers,
-            holesAvailable: holes,
-            bookingUrl: window.location.href
-        };
-        });
-    }, courseName);
+      cards.push(text);
+    });
+
+    const uniqueCards = [...new Set(cards)];
+    const teeTimesData = uniqueCards.map((text) => {
+      const lines = text.split(/\s{2,}|\n/).map((line) => line.trim()).filter(Boolean);
+      const timeLine = lines.find((line) => timeRegex.test(line)) || null;
+      const golfersLine = lines.find((line) => /\d+\s*-\s*\d+|\d+\s*players?/i.test(line)) || null;
+      const holesLine = lines.find((line) => /(?:9|18)\s*holes?|\d+\s*hole/i.test(line)) || null;
+      const priceMatch = text.match(/\$\d+(?:\.\d+)?(?:\s*(?:–|-|to)\s*\$\d+(?:\.\d+)?)?/);
+      const priceText = priceMatch ? priceMatch[0] : null;
+
+      return {
+        courseName,
+        time: timeLine,
+        priceRange: priceText,
+        golferCapacity: golfersLine,
+        holesAvailable: holesLine,
+        bookingUrl: bookingUrl
+      };
+    });
 
     console.log('Organized Tee Times Object:', JSON.stringify(teeTimesData, null, 2));
 
