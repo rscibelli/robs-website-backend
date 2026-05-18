@@ -8,7 +8,7 @@ async function getTeeTimesForCourse(courseName, date) {
   }
 
   try {
-    const apiUrl = `https://phx-api-be-east-1b.kenna.io/v2/tee-times?date=${date}&facilityIds=${courseInfo.facilityId}`;
+    let apiUrl = `https://phx-api-be-east-1b.kenna.io/v2/tee-times?date=${date}&facilityIds=${courseInfo.facilityId}&returnPromotedRates=true`;
     console.log('API URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
@@ -45,7 +45,6 @@ async function getTeeTimesForCourse(courseName, date) {
           teetime.rates.forEach((rate) => {
             const priceCents = rate.greenFeeCart || 0;
             const priceString = `$${(priceCents / 100).toFixed(2)}`;
-            const bookingUrl = `https://${courseInfo.alias}.book.teeitup.com/?course=${courseInfo.facilityId}&date=${date}&max=999999`;
 
             teeTimesData.push({
               courseName: courseInfo.name,
@@ -54,7 +53,7 @@ async function getTeeTimesForCourse(courseName, date) {
               holes: rate.holes,
               playerCapacity: Math.max(0, 4 - teetime.bookedPlayers),
               price: priceString,
-              bookingUrl
+              bookingUrl: courseInfo.bookingUrl
             });
           });
         });
