@@ -1,3 +1,6 @@
 export const GOLF_COURSES = {
-  'westover': 'https://westover-golf-course.book.teeitup.com/teetimes'
+  'westover': {
+    name: 'Westover Golf Course',
+    facilityId: 5059
+  }
 };

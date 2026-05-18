@@ -1,15 +1,16 @@
-import { load } from 'cheerio';
 import { GOLF_COURSES } from './constants.js';
 
 async function getTeeTimesForCourse(courseName, date) {
-  const bookingUrl = GOLF_COURSES[courseName];
+  const courseInfo = GOLF_COURSES[courseName];
   
-  if (!bookingUrl) {
+  if (!courseInfo) {
     throw new Error(`Course "${courseName}" not found in available courses`);
   }
 
   try {
-    const response = await fetch(bookingUrl, {
+    const apiUrl = `https://phx-api-be-east-1b.kenna.io/v2/tee-times?date=${date}&facilityIds=${courseInfo.facilityId}`;
+    
+    const response = await fetch(apiUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)'
       }
@@ -19,49 +20,43 @@ async function getTeeTimesForCourse(courseName, date) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const html = await response.text();
-    console.log('HTML length:', html.length);
-    console.log('First 2000 chars of HTML:\n', html.substring(0, 2000));
-    
-    const $ = load(html);
-    const timeRegex = /\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i;
-    const rateMarkerRegex = /BOOK NOW|CHOOSE RATE|RATE|NOW/i;
+    const data = await response.json();
+    const teeTimesData = [];
 
-    const cards = [];
-    $('div, section, article, li').each((_, element) => {
-      const text = $(element).text().replace(/\s+/g, ' ').trim();
-      if (!text) return;
-      if (!timeRegex.test(text)) return;
-      if (!rateMarkerRegex.test(text)) return;
+    if (data && data.length > 0) {
+      const dayData = data[0];
+      
+      if (dayData.teetimes && dayData.teetimes.length > 0) {
+        dayData.teetimes.forEach((teetime) => {
+          const teeTimeDate = new Date(teetime.teetime);
+          const timeString = teeTimeDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          });
 
-      const parentText = $(element).parent().text().replace(/\s+/g, ' ').trim();
-      if (parentText === text) return;
+          teetime.rates.forEach((rate) => {
+            const priceCents = rate.greenFeeCart || 0;
+            const priceString = `$${(priceCents / 100).toFixed(2)}`;
+            const availableSlots = rate.allowedPlayers.length > 0 ? rate.maxPlayers - teetime.bookedPlayers : 0;
 
-      console.log('Found matching card:', text.substring(0, 200));
-      cards.push(text);
-    });
-
-    console.log('Total cards found:', cards.length);
-
-
-    const uniqueCards = [...new Set(cards)];
-    const teeTimesData = uniqueCards.map((text) => {
-      const lines = text.split(/\s{2,}|\n/).map((line) => line.trim()).filter(Boolean);
-      const timeLine = lines.find((line) => timeRegex.test(line)) || null;
-      const golfersLine = lines.find((line) => /\d+\s*-\s*\d+|\d+\s*players?/i.test(line)) || null;
-      const holesLine = lines.find((line) => /(?:9|18)\s*holes?|\d+\s*hole/i.test(line)) || null;
-      const priceMatch = text.match(/\$\d+(?:\.\d+)?(?:\s*(?:–|-|to)\s*\$\d+(?:\.\d+)?)?/);
-      const priceText = priceMatch ? priceMatch[0] : null;
-
-      return {
-        courseName,
-        time: timeLine,
-        priceRange: priceText,
-        golferCapacity: golfersLine,
-        holesAvailable: holesLine,
-        bookingUrl: bookingUrl
-      };
-    });
+            teeTimesData.push({
+              courseName: courseInfo.name,
+              time: timeString,
+              date: date,
+              holes: rate.holes,
+              playerCapacity: `${rate.minPlayers} - ${rate.maxPlayers}`,
+              allowedPlayers: rate.allowedPlayers,
+              availableSlots: Math.max(0, availableSlots),
+              price: priceString,
+              rateName: rate.name,
+              bookedPlayers: teetime.bookedPlayers,
+              rateId: rate._id
+            });
+          });
+        });
+      }
+    }
 
     console.log('Organized Tee Times Object:', JSON.stringify(teeTimesData, null, 2));
     return teeTimesData;
