@@ -1,67 +1,25 @@
 import { GOLF_COURSES } from './constants.js';
+import { getTeeTimesFromGolfnow } from './teeTimeBookerGolfnow.js';
+import { getTeeTimesFromTeesnap } from './teeTimeBookerTeesnap.js';
 
 async function getTeeTimesForCourse(courseName, date) {
   const courseInfo = GOLF_COURSES[courseName];
-  
+
   if (!courseInfo) {
     throw new Error(`Course "${courseName}" not found in available courses`);
   }
 
   try {
-    let apiUrl = `https://phx-api-be-east-1b.kenna.io/v2/tee-times?date=${date}&facilityIds=${courseInfo.facilityId}&returnPromotedRates=true`;
-    console.log('API URL:', apiUrl);
-    
-    const response = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)',
-        'Accept': 'application/json',
-        'x-be-alias': courseInfo.alias
-      }
-    });
+    const system = (courseInfo.system || '').toLowerCase();
 
-    console.log('API Response Status:', response.status);
-    const responseText = await response.text();
-    console.log('API Response Body:', responseText);
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${responseText}`);
+    switch (system) {
+      case 'teesnap':
+        return await getTeeTimesFromTeesnap(courseInfo, date);
+      case 'golfnow':
+        return await getTeeTimesFromGolfnow(courseInfo, date);
+      default:
+        throw new Error("tee time system isn't supported");
     }
-
-    const data = JSON.parse(responseText);
-    const teeTimesData = [];
-
-    if (data && data.length > 0) {
-      const dayData = data[0];
-      
-      if (dayData.teetimes && dayData.teetimes.length > 0) {
-        dayData.teetimes.forEach((teetime) => {
-          const teeTimeDate = new Date(teetime.teetime);
-          const timeString = teeTimeDate.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-          });
-
-          teetime.rates.forEach((rate) => {
-            const priceCents = rate.greenFeeCart || 0;
-            const priceString = `$${(priceCents / 100).toFixed(2)}`;
-
-            teeTimesData.push({
-              courseName: courseInfo.name,
-              time: timeString,
-              date: date,
-              holes: rate.holes,
-              playerCapacity: Math.max(0, 4 - teetime.bookedPlayers),
-              price: priceString,
-              bookingUrl: courseInfo.bookingUrl
-            });
-          });
-        });
-      }
-    }
-
-    console.log('Organized Tee Times Object:', JSON.stringify(teeTimesData, null, 2));
-    return teeTimesData;
   } catch (err) {
     throw new Error(`Failed to fetch tee times for ${courseName}: ${err.message}`);
   }
