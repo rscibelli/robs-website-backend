@@ -6,7 +6,7 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
 
     const apiUrl = template
       .replace('{date}', formatDateForForeup(date))
-      .replace('{facilityId}', String(courseInfo.facilityId));
+      .replaceAll('{facilityId}', String(courseInfo.facilityId));
 
     console.log('ForeUp API URL:', apiUrl);
 
