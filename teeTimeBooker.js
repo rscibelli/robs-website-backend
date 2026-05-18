@@ -9,18 +9,24 @@ async function getTeeTimesForCourse(courseName, date) {
 
   try {
     const apiUrl = `https://phx-api-be-east-1b.kenna.io/v2/tee-times?date=${date}&facilityIds=${courseInfo.facilityId}`;
+    console.log('API URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)'
+        'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)',
+        'Accept': 'application/json'
       }
     });
 
+    console.log('API Response Status:', response.status);
+    const responseText = await response.text();
+    console.log('API Response Body:', responseText);
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${responseText}`);
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     const teeTimesData = [];
 
     if (data && data.length > 0) {
