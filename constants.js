@@ -48,7 +48,7 @@ export const GOLF_COURSES = {
     name: 'Veterans Memorial Golf Course',
     facilityId: 12166,
     alias: 'veterans-memorial-golf-course',
-    bookingUrl: 'https://www.veteransmemorialgc.com/tee-times/',
+    bookingUrl: 'https://foreupsoftware.com/index.php/booking/22869/12166#teetimes',
     showExactUrl: false,
     teeTimeUrl: 'https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players=0&booking_class=51332&schedule_id={facilityId}&schedule_ids%5B%5D={facilityId}&specials_only=0',
     system: 'foreup'

@@ -7,7 +7,7 @@ async function getTeeTimesForCourse(courseName, date) {
   const courseInfo = GOLF_COURSES[courseName];
 
   if (!courseInfo) {
-    throw new Error(`Course "${courseName}" not found in available courses`);
+    throw new Error(`Course ${courseName} not found in available courses`);
   }
 
   try {
@@ -21,7 +21,7 @@ async function getTeeTimesForCourse(courseName, date) {
       case 'foreup':
         return await getTeeTimesFromForeup(courseInfo, date);
       default:
-        throw new Error("tee time system isn't supported");
+        throw new Error(`Tee time system ${system} isn't supported`);
     }
   } catch (err) {
     throw new Error(`Failed to fetch tee times for ${courseName}: ${err.message}`);
