@@ -5,7 +5,7 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
       'https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players=0&booking_class={bookingClassId}&schedule_id={scheduleId}&schedule_ids%5B%5D={scheduleId}&specials_only=0';
 
     const apiUrl = template
-      .replace('{date}', date)
+      .replace('{date}', formatDateForForuUp(date))
       .replace('{facilityId}', String(courseInfo.facilityId));
 
     console.log('ForeUp API URL:', apiUrl);
@@ -67,4 +67,14 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
       `Failed to fetch ForeUp tee times for ${courseInfo.name}: ${err.message}`
     );
   }
+}
+
+function formatDateForForeup(dateInput = new Date()) {
+  const date = new Date(dateInput);
+
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${month}-${day}-${year}`;
 }
