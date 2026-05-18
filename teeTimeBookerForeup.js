@@ -5,7 +5,7 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
       'https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players=0&booking_class={bookingClassId}&schedule_id={scheduleId}&schedule_ids%5B%5D={scheduleId}&specials_only=0';
 
     const apiUrl = template
-      .replace('{date}', formatDateForForuUp(date))
+      .replace('{date}', formatDateForForeup(date))
       .replace('{facilityId}', String(courseInfo.facilityId));
 
     console.log('ForeUp API URL:', apiUrl);
@@ -20,7 +20,6 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
     console.log('API Response Status:', response.status);
 
     const responseText = await response.text();
-    console.log('API Response Body:', responseText);
 
     if (!response.ok) {
       throw new Error(

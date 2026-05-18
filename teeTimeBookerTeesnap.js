@@ -16,7 +16,6 @@ export async function getTeeTimesFromTeesnap(courseInfo, date) {
 
     const text = await resp.text();
     console.log('Teesnap Response Status:', resp.status);
-    console.log('Teesnap Response Body:', text);
 
     if (!resp.ok) {
       throw new Error(`HTTP ${resp.status}: ${resp.statusText} - ${text}`);
