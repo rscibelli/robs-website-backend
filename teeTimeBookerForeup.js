@@ -1,4 +1,4 @@
-export async function getTeeTimesFromForeUp(courseInfo, date) {
+export async function getTeeTimesFromForeup(courseInfo, date) {
   try {
     const template =
       courseInfo.teeTimeUrl ||
