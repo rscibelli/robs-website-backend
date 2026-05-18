@@ -29,7 +29,7 @@ export const GOLF_COURSES = {
   'chicopee': {
     name: 'Chicopee Country Club',
     facilityId: 5659,
-    alias: 'chicopeecountryclub',
+    alias: 'chicopee-country-club',
     bookingUrl: 'https://www.chicopeecountryclub.com/tee-times/',
     showExactUrl: false,
     teeTimeUrl: 'https://phx-api-be-east-1b.kenna.io/v2/tee-times?date={date}&facilityIds={facilityId}&returnPromotedRates=true',
