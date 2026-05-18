@@ -1,4 +1,3 @@
-import { chromium } from 'playwright';
 import { load } from 'cheerio';
 import { GOLF_COURSES } from './constants.js';
 
@@ -10,16 +9,17 @@ async function getTeeTimesForCourse(courseName, date) {
   }
 
   try {
-    const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const response = await fetch(bookingUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)'
+      }
+    });
 
-    await page.goto(bookingUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
-    // FIX: Wait for the action buttons inside the tee time cards to load
-    await page.waitForSelector('button:has-text("RATE"), button:has-text("NOW")');
-
-    const html = await page.content();
+    const html = await response.text();
     const $ = load(html);
     const timeRegex = /\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i;
     const rateMarkerRegex = /BOOK NOW|CHOOSE RATE|RATE|NOW/i;
@@ -57,8 +57,6 @@ async function getTeeTimesForCourse(courseName, date) {
     });
 
     console.log('Organized Tee Times Object:', JSON.stringify(teeTimesData, null, 2));
-
-    await browser.close();
     return teeTimesData;
   } catch (err) {
     throw new Error(`Failed to fetch tee times for ${courseName}: ${err.message}`);
