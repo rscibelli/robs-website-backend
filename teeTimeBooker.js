@@ -14,7 +14,8 @@ async function getTeeTimesForCourse(courseName, date) {
     const response = await fetch(apiUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; Node.js; +https://example.com)',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'x-be-alias': courseInfo.alias
       }
     });
 
