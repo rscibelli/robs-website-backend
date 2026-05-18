@@ -45,7 +45,7 @@ async function getTeeTimesForCourse(courseName, date) {
           teetime.rates.forEach((rate) => {
             const priceCents = rate.greenFeeCart || 0;
             const priceString = `$${(priceCents / 100).toFixed(2)}`;
-            const availableSlots = rate.allowedPlayers.length > 0 ? rate.maxPlayers - teetime.bookedPlayers : 0;
+            const bookingUrl = `https://${courseInfo.alias}.book.teeitup.com/?course=${courseInfo.facilityId}&date=${date}&max=999999`;
 
             teeTimesData.push({
               courseName: courseInfo.name,
@@ -53,12 +53,8 @@ async function getTeeTimesForCourse(courseName, date) {
               date: date,
               holes: rate.holes,
               playerCapacity: `${rate.minPlayers} - ${rate.maxPlayers}`,
-              allowedPlayers: rate.allowedPlayers,
-              availableSlots: Math.max(0, availableSlots),
               price: priceString,
-              rateName: rate.name,
-              bookedPlayers: teetime.bookedPlayers,
-              rateId: rate._id
+              bookingUrl
             });
           });
         });
