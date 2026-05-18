@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { GOLF_COURSES } from './constants.js';
 
 async function getTeeTimesForCourse(courseName, date) {
@@ -20,7 +20,7 @@ async function getTeeTimesForCourse(courseName, date) {
     await page.waitForSelector('button:has-text("RATE"), button:has-text("NOW")');
 
     const html = await page.content();
-    const $ = cheerio.load(html);
+    const $ = load(html);
     const timeRegex = /\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i;
     const rateMarkerRegex = /BOOK NOW|CHOOSE RATE|RATE|NOW/i;
 
