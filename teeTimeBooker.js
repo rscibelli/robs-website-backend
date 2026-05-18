@@ -20,6 +20,9 @@ async function getTeeTimesForCourse(courseName, date) {
     }
 
     const html = await response.text();
+    console.log('HTML length:', html.length);
+    console.log('First 2000 chars of HTML:\n', html.substring(0, 2000));
+    
     const $ = load(html);
     const timeRegex = /\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i;
     const rateMarkerRegex = /BOOK NOW|CHOOSE RATE|RATE|NOW/i;
@@ -34,8 +37,12 @@ async function getTeeTimesForCourse(courseName, date) {
       const parentText = $(element).parent().text().replace(/\s+/g, ' ').trim();
       if (parentText === text) return;
 
+      console.log('Found matching card:', text.substring(0, 200));
       cards.push(text);
     });
+
+    console.log('Total cards found:', cards.length);
+
 
     const uniqueCards = [...new Set(cards)];
     const teeTimesData = uniqueCards.map((text) => {
