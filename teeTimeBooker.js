@@ -52,7 +52,7 @@ async function getTeeTimesForCourse(courseName, date) {
               time: timeString,
               date: date,
               holes: rate.holes,
-              playerCapacity: `${rate.minPlayers} - ${rate.maxPlayers}`,
+              playerCapacity: Math.max(0, 4 - teetime.bookedPlayers),
               price: priceString,
               bookingUrl
             });
