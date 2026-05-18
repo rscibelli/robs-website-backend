@@ -68,12 +68,8 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
   }
 }
 
-function formatDateForForeup(dateInput = new Date()) {
-  const date = new Date(dateInput);
+function formatDateForForeup(dateInput) {
+  const [year, month, day] = dateInput.split('-');
 
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-
-  return `${month}-${day}-${year}`;
+  return `${month.padStart(2, '0')}-${day.padStart(2, '0')}-${year}`;
 }
