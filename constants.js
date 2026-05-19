@@ -52,5 +52,32 @@ export const GOLF_COURSES = {
     showExactUrl: false,
     teeTimeUrl: 'https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players=0&booking_class=51332&schedule_id={facilityId}&schedule_ids%5B%5D={facilityId}&specials_only=0',
     system: 'foreup'
-  }
+  },
+  'cold-spring': {
+    name: 'Cold Spring Country Club',
+    facilityId: 9516,
+    alias: 'cold-spring-country-club',
+    bookingUrl: 'https://www.coldspringcc.com/public-tee-times/',
+    showExactUrl: false,
+    teeTimeUrl: 'https://phx-api-be-east-1b.kenna.io/v2/tee-times?date={date}&facilityIds={facilityId}&returnPromotedRates=true',
+    system: 'golfnow'
+  },
+  'agawam': {
+    name: 'Agawam Municipal Golf Course',
+    facilityId: 8592,
+    alias: 'agawam-municipal-golf-course',
+    bookingUrl: 'https://www.agawamgolfcourse.com/tee-times/',
+    showExactUrl: false,
+    teeTimeUrl: 'https://phx-api-be-east-1b.kenna.io/v2/tee-times?date={date}&facilityIds={facilityId}&returnPromotedRates=true',
+    system: 'golfnow'
+  },
+  'green-hills': {
+    name: 'Green Hills Golf Course',
+    facilityId: 7270,
+    alias: 'green-hills-golf-course',
+    bookingUrl: 'https://foreupsoftware.com/index.php/booking/21206/7270?_gl=1*1u5rnao*_ga*NTQzNjI4NzIuMTc3OTIwOTMxOQ..*_ga_WQPLP348DP*czE3NzkyMDkzMTkkbzEkZzEkdDE3NzkyMDk0NjgkajYwJGwwJGgw#teetimes',
+    showExactUrl: false,
+    teeTimeUrl: 'https://foreupsoftware.com/index.php/api/booking/times?time=all&date={date}&holes=all&players=0&booking_class=false&schedule_id={facilityId}&schedule_ids%5B%5D={facilityId}&specials_only=0',
+    system: 'foreup'
+  },
 };
