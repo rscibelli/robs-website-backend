@@ -38,7 +38,7 @@ export async function getTeeTimesFromGolfnow(courseInfo, date) {
           });
 
           teetime.rates.forEach((rate) => {
-            const priceCents = rate.greenFeeCart || 0;
+            const priceCents = rate.greenFeeCart || rate.greenFeeWalking || 0;
             const priceString = `$${(priceCents / 100).toFixed(2)}`;
 
             teeTimesData.push({
@@ -48,7 +48,8 @@ export async function getTeeTimesFromGolfnow(courseInfo, date) {
               holes: rate.holes,
               playerCapacity: Math.max(0, 4 - teetime.bookedPlayers),
               price: priceString,
-              bookingUrl: courseInfo.bookingUrl
+              bookingUrl: courseInfo.bookingUrl,
+              details: rate.name
             });
           });
         });
