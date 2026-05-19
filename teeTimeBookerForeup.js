@@ -55,7 +55,8 @@ export async function getTeeTimesFromForeup(courseInfo, date) {
           holes: teetime.holes,
           playerCapacity: teetime.available_spots,
           price: priceString,
-          bookingUrl: courseInfo.bookingUrl
+          bookingUrl: courseInfo.bookingUrl,
+          details: teetime.schedule_name
         });
       });
     }

@@ -69,7 +69,8 @@ export async function getTeeTimesFromTeesnap(courseInfo, date) {
           holes,
           playerCapacity,
           price: priceString,
-          bookingUrl: courseInfo.bookingUrl || apiUrl
+          bookingUrl: courseInfo.bookingUrl || apiUrl,
+          details: entry.rackRateName
         });
       });
     });
